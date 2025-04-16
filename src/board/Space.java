@@ -8,25 +8,21 @@ public class Space {
     private final char col;
     private final int row;
     private final int hash;
+    private final Board board;
     private Piece occupant;
 
-    public Space(char col, int row) {
+    public Space(char col, int row, Board board) {
         this.col = col;
         this.row = row;
         this.hash = Objects.hash(col, row);
+        this.board = board;
         this.occupant = null;
     }
 
     public Space calculateMove(int colChange, int rowChange) {
         char newCol = (char) (col + colChange);
-        if (newCol < 'A' || newCol > 'H') {
-            return null;
-        }
         int newRow = row + rowChange;
-        if (newRow < 1 || newRow > 8) {
-            return null;
-        }
-        return new Space(newCol, newRow);
+        return board.getSpace(newCol, newRow);
     }
 
     public char getCol() {

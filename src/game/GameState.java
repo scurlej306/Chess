@@ -4,5 +4,5 @@ enum GameState {
     ONGOING,
     CHECKMATE,
     STALEMATE,
-    DRAW;
+    DRAW
 }

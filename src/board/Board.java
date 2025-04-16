@@ -32,10 +32,6 @@ public class Board {
         return board.get(getKey(col, row));
     }
 
-    public Space getSpace(String key) {
-        return board.get(key);
-    }
-
     private void initPieces(Team team, int backRow, int direction) {
         pieces.put(team, new HashSet<>());
 
@@ -57,7 +53,7 @@ public class Board {
     private void initSpaces() {
         for (char curChar = 'A'; curChar < 'I'; curChar++) {
             for (int curInt = 1; curInt < 9; curInt++) {
-                board.put(getKey(curChar, curInt), new Space(curChar, curInt));
+                board.put(getKey(curChar, curInt), new Space(curChar, curInt, this));
             }
         }
     }

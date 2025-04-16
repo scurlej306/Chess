@@ -1,12 +1,10 @@
 package game;
 
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import board.Board;
 import board.Space;
-import pieces.Pawn;
 import pieces.Piece;
 
 record Move(Space startSpace, Space targetSpace, Piece targetPiece) {
@@ -26,9 +24,6 @@ record Move(Space startSpace, Space targetSpace, Piece targetPiece) {
 
         Move build() {
             Space targetSpace = getTargetSpace(input);
-            if (targetSpace.getOccupant() != null && targetSpace.getOccupant().getTeam() == currentTeam) {
-                throw new IllegalArgumentException("A piece on the same team occupies the target space");
-            }
             Space startSpace;
             Piece targetPiece;
             if (input.length() == 5) {
@@ -42,9 +37,8 @@ record Move(Space startSpace, Space targetSpace, Piece targetPiece) {
                 }
             } else {
                 char token = input.length() == 3 ? input.charAt(0) : 'P';
-                Predicate<Piece> canReachSpace = getPiecePredicate(targetSpace);
                 Set<Piece> validPieces = board.getPieces(currentTeam).stream()
-                        .filter(piece -> piece.getToken() == token && canReachSpace.test(piece))
+                        .filter(piece -> piece.getToken() == token && MoveValidator.isValid(piece, targetSpace, board))
                         .collect(Collectors.toSet());
                 if (validPieces.isEmpty()) {
                     throw new IllegalArgumentException("No piece of the provided type can reach the target space");
@@ -57,21 +51,6 @@ record Move(Space startSpace, Space targetSpace, Piece targetPiece) {
             }
 
             return new Move(startSpace, targetSpace, targetPiece);
-        }
-
-        private Predicate<Piece> getPiecePredicate(Space targetSpace) {
-            if (targetSpace.getOccupant() == null) {
-                return piece -> MoveValidator.isValid(piece, targetSpace, board);
-            }
-            return piece -> {
-                Space start = piece.getCurSpace();
-                if (piece instanceof Pawn pawn) {
-                    int colDif = Math.abs(start.getCol() - targetSpace.getCol());
-                    int rowDif = (targetSpace.getRow() - start.getRow()) * pawn.getDirection();
-                    return colDif == 1 && rowDif == 1;
-                }
-                return MoveValidator.isValid(piece, targetSpace, board);
-            };
         }
 
         private Space getTargetSpace(String input) {

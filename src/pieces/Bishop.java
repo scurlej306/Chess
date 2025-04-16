@@ -20,7 +20,7 @@ public class Bishop extends Piece {
             spaces.add(curSpace.calculateMove(-i, i));
             spaces.add(curSpace.calculateMove(-i, -i));
         }
-        spaces.remove(null);
+        spaces.removeIf(space -> space == null || (space.getOccupant() != null && space.getOccupant().getTeam() == getTeam()));
         return spaces;
     }
 

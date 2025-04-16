@@ -24,7 +24,7 @@ public class Queen extends Piece {
             spaces.add(curSpace.calculateMove(i, 0));
             spaces.add(curSpace.calculateMove(-i, 0));
         }
-        spaces.remove(null);
+        spaces.removeIf(space -> space == null || (space.getOccupant() != null && space.getOccupant().getTeam() == getTeam()));
         return spaces;
     }
 

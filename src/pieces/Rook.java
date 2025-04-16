@@ -20,7 +20,7 @@ public class Rook extends Piece {
             results.add(curSpace.calculateMove(i, 0));
             results.add(curSpace.calculateMove(-i, 0));
         }
-        results.remove(null);
+        results.removeIf(space -> space == null || (space.getOccupant() != null && space.getOccupant().getTeam() == getTeam()));
         return results;
     }
 

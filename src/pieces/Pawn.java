@@ -1,6 +1,9 @@
 package pieces;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import board.Space;
 import game.Team;
@@ -17,21 +20,39 @@ public class Pawn extends Piece {
         this.startRow = startRow;
     }
 
-    @Override
-    public Set<Space> getMovementDomain() {
-        int nextRow = curSpace.getRow() + direction;
-        if (curSpace.getRow() == startRow) {
-            return Set.of(new Space(curSpace.getCol(), nextRow), new Space(curSpace.getCol(), nextRow + direction));
+    private static void addSpace(Space checkSpace, Function<Space, Boolean> checkFn, Consumer<Space> addFn) {
+        if (checkFn.apply(checkSpace)) {
+            addFn.accept(checkSpace);
         }
-        return Set.of(new Space(curSpace.getCol(), nextRow));
     }
 
-    public int getDirection() {
-        return direction;
+    private static boolean isValidNormalSpace(Space checkSpace) {
+        return checkSpace != null && checkSpace.getOccupant() == null;
+    }
+
+    @Override
+    public Set<Space> getMovementDomain() {
+        Set<Space> domain = new HashSet<>();
+        Space checkSpace = curSpace.calculateMove(-1, direction);
+        addSpace(checkSpace, this::isValidAttackSpace, domain::add);
+        checkSpace = curSpace.calculateMove(1, direction);
+        addSpace(checkSpace, this::isValidAttackSpace, domain::add);
+
+        checkSpace = curSpace.calculateMove(0, direction);
+        addSpace(checkSpace, Pawn::isValidNormalSpace, domain::add);
+        if (curSpace.getRow() == startRow) {
+            checkSpace = curSpace.calculateMove(0, direction * 2);
+            addSpace(checkSpace, Pawn::isValidNormalSpace, domain::add);
+        }
+        return domain;
     }
 
     @Override
     public char getToken() {
         return 'P';
+    }
+
+    private boolean isValidAttackSpace(Space checkSpace) {
+        return checkSpace != null && checkSpace.getOccupant() != null && checkSpace.getOccupant().getTeam() != getTeam();
     }
 }
