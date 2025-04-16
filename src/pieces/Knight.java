@@ -1,0 +1,34 @@
+package pieces;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import board.Space;
+import game.Team;
+
+public class Knight extends Piece {
+
+    public Knight(Team team) {
+        super(team);
+    }
+
+    @Override
+    public Set<Space> getMovementDomain() {
+        Set<Space> spaces = new HashSet<>();
+        spaces.add(curSpace.calculateMove(1, 2));
+        spaces.add(curSpace.calculateMove(-1, 2));
+        spaces.add(curSpace.calculateMove(1, -2));
+        spaces.add(curSpace.calculateMove(-1, -2));
+        spaces.add(curSpace.calculateMove(2, 1));
+        spaces.add(curSpace.calculateMove(-2, 1));
+        spaces.add(curSpace.calculateMove(2, -1));
+        spaces.add(curSpace.calculateMove(-2, -1));
+        spaces.remove(null);
+        return spaces;
+    }
+
+    @Override
+    public char getToken() {
+        return 'N';
+    }
+}
