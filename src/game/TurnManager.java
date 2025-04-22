@@ -53,10 +53,16 @@ class TurnManager {
     }
 
     private GameState determineState() {
-        return isNotCheckmate() ? GameState.ONGOING : GameState.CHECKMATE;
+        if (isCheckmate()) {
+            return GameState.CHECKMATE;
+        }
+        if (isStalemate()) {
+            return GameState.STALEMATE;
+        }
+        return GameState.ONGOING;
     }
 
-    private boolean isNotCheckmate() {
+    private boolean isCheckmate() {
         Set<Piece> currentTeamPieces = board.getPieces(currentTeam);
         Set<Piece> opponentPieces = board.getPieces(Team.getOpposite(currentTeam));
         Piece opponentKing = opponentPieces.stream().filter(King.class::isInstance).findAny().orElseThrow(IllegalStateException::new);
@@ -67,16 +73,19 @@ class TurnManager {
 
         /* No active checks, so no checkmate. */
         if (checkVectors.isEmpty()) {
-            return true;
+            return false;
         }
 
         /* If only 1 active check and an opponent piece can take or block, no checkmate. */
         if (checkVectors.size() == 1 && checkVectors.getFirst().stream().anyMatch(space -> opponentPieces.stream().anyMatch(piece -> MoveValidator.isValid(piece, space, board)))) {
-            return true;
+            return false;
         }
 
         /* Lastly, if the king can move to any adjacent space without also being in check, no checkmate. */
-        return opponentKing.getMovementDomain().stream().anyMatch(space -> MoveValidator.isValid(opponentKing, space, board));
+        return opponentKing.getMovementDomain().stream().noneMatch(space -> MoveValidator.isValid(opponentKing, space, board));
     }
 
+    private boolean isStalemate() {
+        return board.getPieces(Team.getOpposite(currentTeam)).stream().noneMatch(piece -> piece.getMovementDomain().stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)));
+    }
 }
