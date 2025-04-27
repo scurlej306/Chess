@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import board.Board;
 import board.Space;
+import move.Move;
+import move.MoveFactory;
+import move.MoveValidator;
 import pieces.King;
 import pieces.Piece;
 
@@ -22,6 +26,10 @@ class TurnManager {
         currentTeam = Team.BLACK; // Start as black, so the first toggle starts the game as white
     }
 
+    static boolean isValidInput(String move) {
+        return Pattern.matches("^([BKNQR][A-H1-8]?)?[A-H][1-8]|O(-O){1,2}$", move);
+    }
+
     Team getCurrentTeam() {
         return currentTeam;
     }
@@ -32,7 +40,7 @@ class TurnManager {
         do {
             System.out.println("Enter a move for " + currentTeam);
             input = reader.readLine().toUpperCase().trim();
-        } while (!MoveValidator.isValidInput(input));
+        } while (!isValidInput(input));
         return processMove(input);
     }
 
@@ -43,7 +51,7 @@ class TurnManager {
     private GameState processMove(String input) throws IOException {
         Move move;
         try {
-            move = new Move.Builder(input, board, currentTeam).build();
+            move = new MoveFactory(input, board, currentTeam).constructMove();
         } catch (IllegalArgumentException e) {
             System.out.printf("Move '%s' had the following error: %s. Try again.\n", input, e.getMessage());
             return processTurn();

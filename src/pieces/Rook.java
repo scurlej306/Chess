@@ -6,9 +6,12 @@ import java.util.Set;
 import board.Space;
 import game.Team;
 
-public class Rook extends Piece {
+public class Rook extends Piece implements Castles {
+    private boolean alreadyMoved;
+
     public Rook(Team team) {
         super(team);
+        alreadyMoved = false;
     }
 
     @Override
@@ -27,5 +30,15 @@ public class Rook extends Piece {
     @Override
     public char getToken() {
         return 'R';
+    }
+
+    @Override
+    public boolean hasAlreadyMoved() {
+        return alreadyMoved;
+    }
+
+    @Override
+    public void invalidateCastling() {
+        alreadyMoved = true;
     }
 }

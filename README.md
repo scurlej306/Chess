@@ -19,5 +19,6 @@ Enter moves in the following formats:
   e4. If White wishes to capture the pawn on d5 with one of the attacking pawns, they would enter either 'cd5' or
   'ed5'. Similarly, if Black had rooks on e2 and e6 that could both reach the e3 square, Black would have to enter
   either 'R2e3' or 'R6e3'.
+* Castling: To castle, enter either 'O-O' or 'O-O-O' for king- or queen-side castling, respectively.
 
 This application is freely provided under the MIT License. Copyright 2025 Jacob Curley.
