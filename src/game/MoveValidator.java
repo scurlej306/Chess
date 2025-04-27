@@ -14,19 +14,19 @@ import pieces.Piece;
 class MoveValidator {
 
     static boolean isValidInput(String move) {
-        return Pattern.matches("^[BKNQR]?([A-H][1-8]){1,2}$", move);
+        return Pattern.matches("^([BKNQR][A-H1-8]?)?[A-H][1-8]$", move);
     }
 
     static boolean isValid(Piece movingPiece, Space target, Board board) {
         return movingPiece.getMovementDomain().contains(target)
-                && !generatePath(movingPiece, target, board).isEmpty()
+                && !generatePath(movingPiece, target).isEmpty()
                 && notInCheck(movingPiece, target, board);
     }
 
-    static Set<Space> generatePath(Piece movingPiece, Space target, Board board) {
+    static Set<Space> generatePath(Piece movingPiece, Space target) {
         Set<Space> path = new HashSet<>();
         if (!(movingPiece instanceof Knight)) {
-            Function<Space, Space> movement = getMovementFn(movingPiece.getCurSpace(), target, board);
+            Function<Space, Space> movement = getMovementFn(movingPiece.getCurSpace(), target);
             for (Space curSpace = movement.apply(movingPiece.getCurSpace()); !target.equals(curSpace); curSpace = movement.apply(curSpace)) {
                 if (curSpace.getOccupant() != null) {
                     return Set.of();
@@ -39,16 +39,14 @@ class MoveValidator {
         return path;
     }
 
-    private static Function<Space, Space> getMovementFn(Space start, Space target, Board board) {
+    private static Function<Space, Space> getMovementFn(Space start, Space target) {
         int colDif = target.getCol() - start.getCol();
         int colIncrement = colDif == 0 ? 0 : colDif / Math.abs(colDif);
-        Function<Character, Character> colFn = (c) -> (char)(c + colIncrement);
 
         int rowDif = target.getRow() - start.getRow();
         int rowIncrement = rowDif == 0 ? 0 : rowDif / Math.abs(rowDif);
-        Function<Integer, Integer> rowFn = (r) -> r + rowIncrement;
 
-        return (space) -> board.getSpace(colFn.apply(space.getCol()), rowFn.apply(space.getRow()));
+        return (space) -> space.calculateMove(colIncrement, rowIncrement);
     }
 
     private static boolean notInCheck(Piece movingPiece, Space target, Board board) {

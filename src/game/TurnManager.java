@@ -69,7 +69,7 @@ class TurnManager {
 
         /* Determine if any piece sees the opponent king. */
         List<Set<Space>> checkVectors = currentTeamPieces.stream().filter(piece -> MoveValidator.isValid(piece, opponentKing.getCurSpace(), board))
-                .map(piece -> MoveValidator.generatePath(piece, opponentKing.getCurSpace(), board)).toList();
+                .map(piece -> MoveValidator.generatePath(piece, opponentKing.getCurSpace())).toList();
 
         /* No active checks, so no checkmate. */
         if (checkVectors.isEmpty()) {
