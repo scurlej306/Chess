@@ -34,16 +34,27 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
             rookStartCol = 'A';
         }
         King king =
-                (King) board.getPieces(currentTeam).stream().filter(King.class::isInstance).findFirst().orElseThrow(IllegalStateException::new);
+                (King) currentTeam.stream().filter(King.class::isInstance).findFirst().orElseThrow(IllegalStateException::new);
         if (king.hasAlreadyMoved()) {
-            throw new IllegalArgumentException("The King has already moved. Castling is not allowed.");
+            throw new IllegalArgumentException("The King has already moved. Castling is not allowed");
         }
         Space kingTargetSpace = king.getCurSpace().calculateMove(kingColChange, 0);
+        Set<Space> kingMoves = MoveValidator.generatePath(king, kingTargetSpace);
+        if (kingMoves.isEmpty()) {
+            throw new IllegalArgumentException("There cannot be any pieces between the king and its target space");
+        }
+        if (Team.getOpposite(currentTeam).stream().anyMatch(piece -> kingMoves.stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)))) {
+            throw new IllegalArgumentException("The king cannot move out of, through, or into check");
+        }
 
         Rook rook =
-                (Rook) board.getPieces(currentTeam).stream().filter(Rook.class::isInstance).filter(piece -> piece.getCurSpace().getCol() == rookStartCol).findFirst().orElseThrow(IllegalStateException::new);
+                (Rook) currentTeam.stream().filter(Rook.class::isInstance).filter(piece -> piece.getCurSpace().getCol() == rookStartCol).findFirst().orElseThrow(IllegalStateException::new);
         if (rook.hasAlreadyMoved()) {
-            throw new IllegalArgumentException("The desired rook has already moved. Castling with this rook is not " + "allowed.");
+            throw new IllegalArgumentException("The desired rook has already moved. Castling with this rook is not allowed");
+        }
+        Space targetRookSpace = rook.getCurSpace().calculateMove(rookColChange, 0);
+        if (!MoveValidator.isValid(rook, targetRookSpace, board)) {
+            throw new IllegalArgumentException("The rook cannot legally move to its target space");
         }
         Move rookMove = new Move(rook, rook.getCurSpace().calculateMove(rookColChange, 0));
         return new CastleMove(king, kingTargetSpace, rookMove);
@@ -52,8 +63,7 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
     private Move constructNormalMove() {
         Space targetSpace = getTargetSpace();
         char token = input.length() > 2 ? input.charAt(0) : 'P';
-        Set<Piece> validPieces =
-                board.getPieces(currentTeam).stream().filter(piece -> piece.getToken() == token && MoveValidator.isValid(piece, targetSpace, board)).collect(Collectors.toSet());
+        Set<Piece> validPieces = currentTeam.stream().filter(piece -> piece.getToken() == token && MoveValidator.isValid(piece, targetSpace, board)).collect(Collectors.toSet());
         if (validPieces.isEmpty()) {
             throw new IllegalArgumentException("No piece of the provided type can reach the target space");
         }
@@ -72,7 +82,7 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
     private Predicate<Piece> getPiecePredicate() {
         if (input.length() != 4) {
             /* No determinate provided, so make the predicate return no matches. */
-            return piece -> false;
+            return _ -> false;
         }
         char determinate = input.charAt(1);
         if (Character.isDigit(determinate)) {

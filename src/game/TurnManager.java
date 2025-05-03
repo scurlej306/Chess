@@ -71,12 +71,11 @@ class TurnManager {
     }
 
     private boolean isCheckmate() {
-        Set<Piece> currentTeamPieces = board.getPieces(currentTeam);
-        Set<Piece> opponentPieces = board.getPieces(Team.getOpposite(currentTeam));
-        Piece opponentKing = opponentPieces.stream().filter(King.class::isInstance).findAny().orElseThrow(IllegalStateException::new);
+        Team opponentTeam = Team.getOpposite(currentTeam);
+        Piece opponentKing = opponentTeam.stream().filter(King.class::isInstance).findAny().orElseThrow(IllegalStateException::new);
 
         /* Determine if any piece sees the opponent king. */
-        List<Set<Space>> checkVectors = currentTeamPieces.stream().filter(piece -> MoveValidator.isValid(piece, opponentKing.getCurSpace(), board))
+        List<Set<Space>> checkVectors = currentTeam.stream().filter(piece -> MoveValidator.isValid(piece, opponentKing.getCurSpace(), board))
                 .map(piece -> MoveValidator.generatePath(piece, opponentKing.getCurSpace())).toList();
 
         /* No active checks, so no checkmate. */
@@ -85,7 +84,7 @@ class TurnManager {
         }
 
         /* If only 1 active check and an opponent piece can take or block, no checkmate. */
-        if (checkVectors.size() == 1 && checkVectors.getFirst().stream().anyMatch(space -> opponentPieces.stream().anyMatch(piece -> MoveValidator.isValid(piece, space, board)))) {
+        if (checkVectors.size() == 1 && checkVectors.getFirst().stream().anyMatch(space -> opponentTeam.stream().anyMatch(piece -> MoveValidator.isValid(piece, space, board)))) {
             return false;
         }
 
@@ -94,6 +93,6 @@ class TurnManager {
     }
 
     private boolean isStalemate() {
-        return board.getPieces(Team.getOpposite(currentTeam)).stream().noneMatch(piece -> piece.getMovementDomain().stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)));
+        return Team.getOpposite(currentTeam).stream().noneMatch(piece -> piece.getMovementDomain().stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)));
     }
 }

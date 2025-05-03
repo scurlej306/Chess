@@ -50,7 +50,7 @@ public class MoveValidator {
         if (movingPiece instanceof King) {
             spaceToCheck = target;
         } else {
-            Piece king = board.getPieces(movingPiece.getTeam()).stream().filter(King.class::isInstance).findAny().orElseThrow(IllegalStateException::new);
+            Piece king = movingPiece.getTeam().stream().filter(King.class::isInstance).findAny().orElseThrow(IllegalStateException::new);
             spaceToCheck = king.getCurSpace();
         }
 
@@ -61,9 +61,7 @@ public class MoveValidator {
         startSpace.setOccupant(null);
 
         Team oppositeTeam = Team.getOpposite(movingPiece.getTeam());
-        Set<Piece> oppositePieces = board.getPieces(oppositeTeam);
-
-        boolean notInCheck = oppositePieces.stream().filter(piece -> !piece.equals(curOccupant)).noneMatch(piece -> isValid(piece, spaceToCheck, board));
+        boolean notInCheck = oppositeTeam.stream().filter(piece -> !piece.equals(curOccupant)).noneMatch(piece -> isValid(piece, spaceToCheck, board));
 
         target.setOccupant(curOccupant);
         startSpace.setOccupant(movingPiece);

@@ -1,20 +1,16 @@
 package board;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import game.Team;
 import pieces.*;
 
 public class Board {
     private final Map<String, Space> board;
-    private final Map<Team, Set<Piece>> pieces;
 
     public Board() {
         board = new HashMap<>();
-        pieces = new HashMap<>();
         initSpaces();
         initPieces(Team.WHITE, 1, 1);
         initPieces(Team.BLACK, 8, -1);
@@ -24,17 +20,11 @@ public class Board {
         return String.format("%c%d", col, row);
     }
 
-    public Set<Piece> getPieces(Team team) {
-        return pieces.get(team);
-    }
-
     public Space getSpace(char col, int row) {
         return board.get(getKey(col, row));
     }
 
     private void initPieces(Team team, int backRow, int direction) {
-        pieces.put(team, new HashSet<>());
-
         setPiece(getSpace('A', backRow), team, new Rook(team));
         setPiece(getSpace('B', backRow), team, new Knight(team));
         setPiece(getSpace('C', backRow), team, new Bishop(team));
@@ -61,6 +51,6 @@ public class Board {
     private void setPiece(Space space, Team team, Piece piece) {
         space.setOccupant(piece);
         piece.setCurSpace(space);
-        pieces.get(team).add(piece);
+        team.add(piece);
     }
 }

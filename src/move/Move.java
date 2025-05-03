@@ -18,7 +18,7 @@ public class Move {
     public void doMove(Board board) {
         Piece prevOccupant = targetSpace.getOccupant();
         if (prevOccupant != null) {
-            board.getPieces(prevOccupant.getTeam()).remove(prevOccupant);
+            prevOccupant.getTeam().remove(prevOccupant);
         }
         if (targetPiece instanceof Castles castles) {
             castles.invalidateCastling();
