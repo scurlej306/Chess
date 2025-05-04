@@ -2,14 +2,14 @@ package move;
 
 import board.Board;
 import board.Space;
-import pieces.Piece;
+import pieces.King;
 
 class CastleMove extends Move {
 
     private final Move rookMove;
 
-    CastleMove(Piece targetPiece, Space targetSpace, Move rookMove) {
-        super(targetPiece, targetSpace);
+    CastleMove(King king, Space targetSpace, Move rookMove) {
+        super(king, targetSpace);
         this.rookMove = rookMove;
     }
 

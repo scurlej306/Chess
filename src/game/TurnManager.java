@@ -67,6 +67,9 @@ class TurnManager {
         if (isStalemate()) {
             return GameState.STALEMATE;
         }
+        if (isDraw()) {
+            return GameState.DRAW;
+        }
         return GameState.ONGOING;
     }
 
@@ -90,6 +93,10 @@ class TurnManager {
 
         /* Lastly, if the king can move to any adjacent space without also being in check, no checkmate. */
         return opponentKing.getMovementDomain().stream().noneMatch(space -> MoveValidator.isValid(opponentKing, space, board));
+    }
+
+    private boolean isDraw() {
+        return Team.BLACK.hasInsufficientMaterial() && Team.WHITE.hasInsufficientMaterial();
     }
 
     private boolean isStalemate() {
