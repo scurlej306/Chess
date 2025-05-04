@@ -5,11 +5,12 @@ import java.util.Set;
 
 import board.Space;
 import game.Team;
+import game.TeamColor;
 
 public class Rook extends Piece implements Castles {
     private boolean alreadyMoved;
 
-    public Rook(Team team) {
+    public Rook(TeamColor team) {
         super(team);
         alreadyMoved = false;
     }

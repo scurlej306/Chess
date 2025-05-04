@@ -1,20 +1,21 @@
 package move;
 
-import board.Board;
-import board.Space;
-import game.Team;
-import pieces.King;
-import pieces.Piece;
-import pieces.Rook;
-
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public record MoveFactory(String input, Board board, Team currentTeam) {
+import board.Board;
+import board.Space;
+import game.TeamColor;
+import input.InputDto;
+import pieces.King;
+import pieces.Piece;
+import pieces.Rook;
+
+public record MoveFactory(InputDto input, Board board, TeamColor currentTeam) {
 
     public Move constructMove() {
-        if (input.startsWith("O")) {
+        if (input.castling) {
             return constructCastleMove();
         }
         return constructNormalMove();
@@ -23,15 +24,12 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
     private CastleMove constructCastleMove() {
         int kingColChange;
         int rookColChange;
-        char rookStartCol;
-        if ("O-O".equals(input)) {
+        if (input.castlingRookCol == 'H') {
             kingColChange = 2;
             rookColChange = -2;
-            rookStartCol = 'H';
         } else {
             kingColChange = -2;
             rookColChange = 3;
-            rookStartCol = 'A';
         }
         King king =
                 (King) currentTeam.stream().filter(King.class::isInstance).findFirst().orElseThrow(IllegalStateException::new);
@@ -43,12 +41,15 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
         if (kingMoves.isEmpty()) {
             throw new IllegalArgumentException("There cannot be any pieces between the king and its target space");
         }
-        if (Team.getOpposite(currentTeam).stream().anyMatch(piece -> kingMoves.stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)))) {
+        if (TeamColor.getOpposite(currentTeam).stream().anyMatch(piece -> kingMoves.stream()
+                .anyMatch(space -> MoveValidator.isValid(piece, space, board)))) {
             throw new IllegalArgumentException("The king cannot move out of, through, or into check");
         }
 
         Rook rook =
-                (Rook) currentTeam.stream().filter(Rook.class::isInstance).filter(piece -> piece.getCurSpace().getCol() == rookStartCol).findFirst().orElseThrow(IllegalStateException::new);
+                (Rook) currentTeam.stream().filter(Rook.class::isInstance).filter(
+                                piece -> piece.getCurSpace().getCol() == input.castlingRookCol).findFirst()
+                        .orElseThrow(IllegalStateException::new);
         if (rook.hasAlreadyMoved()) {
             throw new IllegalArgumentException("The desired rook has already moved. Castling with this rook is not allowed");
         }
@@ -61,17 +62,20 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
     }
 
     private Move constructNormalMove() {
-        Space targetSpace = getTargetSpace();
-        char token = input.length() > 2 ? input.charAt(0) : 'P';
-        Set<Piece> validPieces = currentTeam.stream().filter(piece -> piece.getToken() == token && MoveValidator.isValid(piece, targetSpace, board)).collect(Collectors.toSet());
+        Space targetSpace = board.getSpace(input.destinationCol, input.destinationRow);
+        char token = input.movingPieceToken != null ? input.movingPieceToken : 'P';
+        Set<Piece> validPieces = currentTeam.stream().filter(
+                        piece -> piece.getToken() == token && MoveValidator.isValid(piece, targetSpace, board))
+                .collect(Collectors.toSet());
         if (validPieces.isEmpty()) {
             throw new IllegalArgumentException("No piece of the provided type can reach the target space");
         }
         Piece targetPiece;
         if (validPieces.size() > 1) {
             Predicate<Piece> pieceMatcher = getPiecePredicate();
-            targetPiece =
-                    validPieces.stream().filter(pieceMatcher).findFirst().orElseThrow(() -> new IllegalArgumentException("Ambiguous move - multiple pieces of the provided" + " type can reach the target space"));
+            targetPiece = validPieces.stream().filter(pieceMatcher).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Ambiguous move - multiple pieces of the provided" +
+                                                                    " type can reach the target space"));
         } else {
             targetPiece = validPieces.iterator().next();
         }
@@ -80,21 +84,16 @@ public record MoveFactory(String input, Board board, Team currentTeam) {
     }
 
     private Predicate<Piece> getPiecePredicate() {
-        if (input.length() != 4) {
-            /* No determinate provided, so make the predicate return no matches. */
-            return _ -> false;
+        if (input.originCol != null && input.originRow != null) {
+            Space origin = board.getSpace(input.originCol, input.originRow);
+            return piece -> piece.getCurSpace().equals(origin);
         }
-        char determinate = input.charAt(1);
-        if (Character.isDigit(determinate)) {
-            int row = Character.digit(determinate, 10);
-            return piece -> piece.getCurSpace().getRow() == row;
+        if (input.originCol != null) {
+            return piece -> piece.getCurSpace().getCol() == input.originCol;
         }
-        return piece -> piece.getCurSpace().getCol() == determinate;
-    }
-
-    private Space getTargetSpace() {
-        int targetRow = Character.digit(input.charAt(input.length() - 1), 10);
-        char targetCol = input.charAt(input.length() - 2);
-        return board.getSpace(targetCol, targetRow);
+        if (input.originRow != null) {
+            return piece -> piece.getCurSpace().getRow() == input.originRow;
+        }
+        return _ -> false;
     }
 }

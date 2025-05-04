@@ -7,6 +7,7 @@ import java.util.function.Function;
 import board.Board;
 import board.Space;
 import game.Team;
+import game.TeamColor;
 import pieces.King;
 import pieces.Knight;
 import pieces.Piece;
@@ -60,7 +61,7 @@ public class MoveValidator {
         movingPiece.setCurSpace(target);
         startSpace.setOccupant(null);
 
-        Team oppositeTeam = Team.getOpposite(movingPiece.getTeam());
+        TeamColor oppositeTeam = TeamColor.getOpposite(movingPiece.getTeam());
         boolean notInCheck = oppositeTeam.stream().filter(piece -> !piece.equals(curOccupant)).noneMatch(piece -> isValid(piece, spaceToCheck, board));
 
         target.setOccupant(curOccupant);

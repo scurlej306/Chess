@@ -5,10 +5,11 @@ import java.util.Set;
 
 import board.Space;
 import game.Team;
+import game.TeamColor;
 
 public class Knight extends Piece {
 
-    public Knight(Team team) {
+    public Knight(TeamColor team) {
         super(team);
     }
 

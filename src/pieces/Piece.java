@@ -3,13 +3,13 @@ package pieces;
 import java.util.Set;
 
 import board.Space;
-import game.Team;
+import game.TeamColor;
 
 public abstract class Piece {
-    private final Team team;
+    private final TeamColor team;
     protected Space curSpace;
 
-    protected Piece(Team team) {
+    protected Piece(TeamColor team) {
         this.team = team;
     }
 
@@ -19,7 +19,7 @@ public abstract class Piece {
         return curSpace;
     }
 
-    public Team getTeam() {
+    public TeamColor getTeam() {
         return team;
     }
 

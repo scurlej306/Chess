@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import board.Space;
 import game.Team;
+import game.TeamColor;
 
 public class Pawn extends Piece {
 
@@ -14,9 +15,9 @@ public class Pawn extends Piece {
 
     private final int startRow;
 
-    public Pawn(Team team, int startRow) {
+    public Pawn(TeamColor team, int startRow) {
         super(team);
-        direction = team == Team.WHITE ? 1 : -1;
+        direction = team == TeamColor.WHITE ? 1 : -1;
         this.startRow = startRow;
     }
 

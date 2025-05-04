@@ -1,14 +1,16 @@
 package game;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import board.Board;
 import board.Space;
+import input.InputDto;
+import input.InputParser;
+import input.InputReader;
 import move.Move;
 import move.MoveFactory;
 import move.MoveValidator;
@@ -19,45 +21,29 @@ class TurnManager {
 
     private final Board board;
 
-    private Team currentTeam;
+    private TeamColor currentTeam;
 
     TurnManager(Board board) {
         this.board = board;
-        currentTeam = Team.BLACK; // Start as black, so the first toggle starts the game as white
+        currentTeam = TeamColor.BLACK; // Start as black, so the first toggle starts the game as white
     }
 
     static boolean isValidInput(String move) {
         return Pattern.matches("^([BKNQR][A-H1-8]?)?[A-H][1-8]|O(-O){1,2}$", move);
     }
 
-    Team getCurrentTeam() {
+    TeamColor getCurrentTeam() {
         return currentTeam;
     }
 
     GameState processTurn() throws IOException {
-        String input;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        do {
-            System.out.println("Enter a move for " + currentTeam);
-            input = reader.readLine().toUpperCase().trim();
-        } while (!isValidInput(input));
+        Matcher matcher = new InputReader(currentTeam).read();
+        InputDto input = new InputParser(matcher).parse();
         return processMove(input);
     }
 
     void toggleCurrentTeam() {
-        currentTeam = Team.getOpposite(currentTeam);
-    }
-
-    private GameState processMove(String input) throws IOException {
-        Move move;
-        try {
-            move = new MoveFactory(input, board, currentTeam).constructMove();
-        } catch (IllegalArgumentException e) {
-            System.out.printf("Move '%s' had the following error: %s. Try again.\n", input, e.getMessage());
-            return processTurn();
-        }
-        move.doMove(board);
-        return determineState();
+        currentTeam = TeamColor.getOpposite(currentTeam);
     }
 
     private GameState determineState() {
@@ -74,7 +60,7 @@ class TurnManager {
     }
 
     private boolean isCheckmate() {
-        Team opponentTeam = Team.getOpposite(currentTeam);
+        TeamColor opponentTeam = TeamColor.getOpposite(currentTeam);
         Piece opponentKing = opponentTeam.stream().filter(King.class::isInstance).findAny().orElseThrow(IllegalStateException::new);
 
         /* Determine if any piece sees the opponent king. */
@@ -96,10 +82,22 @@ class TurnManager {
     }
 
     private boolean isDraw() {
-        return Team.BLACK.hasInsufficientMaterial() && Team.WHITE.hasInsufficientMaterial();
+        return TeamColor.BLACK.hasInsufficientMaterial() && TeamColor.WHITE.hasInsufficientMaterial();
     }
 
     private boolean isStalemate() {
-        return Team.getOpposite(currentTeam).stream().noneMatch(piece -> piece.getMovementDomain().stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)));
+        return TeamColor.getOpposite(currentTeam).stream().noneMatch(piece -> piece.getMovementDomain().stream().anyMatch(space -> MoveValidator.isValid(piece, space, board)));
+    }
+
+    private GameState processMove(InputDto input) throws IOException {
+        Move move;
+        try {
+            move = new MoveFactory(input, board, currentTeam).constructMove();
+        } catch (IllegalArgumentException e) {
+            System.out.printf("Move '%s' had the following error: %s. Try again.\n", input, e.getMessage());
+            return processTurn();
+        }
+        move.doMove(board);
+        return determineState();
     }
 }
