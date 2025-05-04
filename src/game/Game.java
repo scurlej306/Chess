@@ -10,11 +10,14 @@ public class Game {
 
     private final Board board;
 
+    private final Team.Players players;
+
     private final TurnManager turnManager;
 
     public Game() {
-        board = new Board();
-        turnManager = new TurnManager(board);
+        players = Team.initPlayers();
+        board = new Board(players);
+        turnManager = new TurnManager(board, players);
     }
 
     public void start() {
@@ -22,7 +25,7 @@ public class Game {
             GameState state = GameState.ONGOING;
             while (state == GameState.ONGOING) {
                 drawBoard();
-                turnManager.toggleCurrentTeam();
+                players.toggleCurrentTeam();
                 state = turnManager.processTurn();
             }
             drawBoard();
@@ -41,7 +44,7 @@ public class Game {
             for (char col = 'A'; col < 'I'; col++) {
                 Space space = board.getSpace(col, row);
                 Piece occupant = space.getOccupant();
-                String token = occupant != null ? String.format("%c%c", occupant.getTeam().name().toLowerCase().charAt(0), occupant.getToken()) : "  ";
+                String token = occupant != null ? String.format("%c%c", occupant.getTeam().getColor().name().toLowerCase().charAt(0), occupant.getToken()) : "  ";
                 System.out.printf("%s | ", token);
             }
             System.out.println(row);
@@ -53,7 +56,7 @@ public class Game {
     private void reportFinalState(GameState state) {
         switch (state) {
             case DRAW -> System.out.println("Draw. Game over.");
-            case CHECKMATE -> System.out.printf("Checkmate! %s wins!", turnManager.getCurrentTeam());
+            case CHECKMATE -> System.out.printf("Checkmate! %s wins!", players.getCurrentTeam().getColor());
             case STALEMATE -> System.out.println("Stalemate. Game over.");
         }
     }

@@ -7,18 +7,11 @@ import java.util.function.Function;
 import board.Board;
 import board.Space;
 import game.Team;
-import game.TeamColor;
 import pieces.King;
 import pieces.Knight;
 import pieces.Piece;
 
 public class MoveValidator {
-
-    public static boolean isValid(Piece movingPiece, Space target, Board board) {
-        return movingPiece.getMovementDomain().contains(target)
-                && !generatePath(movingPiece, target).isEmpty()
-                && notInCheck(movingPiece, target, board);
-    }
 
     public static Set<Space> generatePath(Piece movingPiece, Space target) {
         Set<Space> path = new HashSet<>();
@@ -34,6 +27,12 @@ public class MoveValidator {
         path.add(movingPiece.getCurSpace());
         path.add(target);
         return path;
+    }
+
+    public static boolean isValid(Piece movingPiece, Space target, Board board) {
+        return movingPiece.getMovementDomain().contains(target)
+               && !generatePath(movingPiece, target).isEmpty()
+               && notInCheck(movingPiece, target, board);
     }
 
     private static Function<Space, Space> getMovementFn(Space start, Space target) {
@@ -61,7 +60,7 @@ public class MoveValidator {
         movingPiece.setCurSpace(target);
         startSpace.setOccupant(null);
 
-        TeamColor oppositeTeam = TeamColor.getOpposite(movingPiece.getTeam());
+        Team oppositeTeam = movingPiece.getTeam().getOpponent();
         boolean notInCheck = oppositeTeam.stream().filter(piece -> !piece.equals(curOccupant)).noneMatch(piece -> isValid(piece, spaceToCheck, board));
 
         target.setOccupant(curOccupant);

@@ -3,17 +3,18 @@ package board;
 import java.util.HashMap;
 import java.util.Map;
 
-import game.TeamColor;
+import game.Team;
 import pieces.*;
 
 public class Board {
+
     private final Map<String, Space> board;
 
-    public Board() {
+    public Board(Team.Players teams) {
         board = new HashMap<>();
         initSpaces();
-        initPieces(TeamColor.WHITE, 1, 1);
-        initPieces(TeamColor.BLACK, 8, -1);
+        initPieces(teams.getWhite(), 1, 1);
+        initPieces(teams.getBlack(), 8, -1);
     }
 
     private static String getKey(char col, int row) {
@@ -24,7 +25,7 @@ public class Board {
         return board.get(getKey(col, row));
     }
 
-    private void initPieces(TeamColor team, int backRow, int direction) {
+    private void initPieces(Team team, int backRow, int direction) {
         setPiece(getSpace('A', backRow), team, new Rook(team));
         setPiece(getSpace('B', backRow), team, new Knight(team));
         setPiece(getSpace('C', backRow), team, new Bishop(team));
@@ -48,7 +49,7 @@ public class Board {
         }
     }
 
-    private void setPiece(Space space, TeamColor team, Piece piece) {
+    private void setPiece(Space space, Team team, Piece piece) {
         space.setOccupant(piece);
         piece.setCurSpace(space);
         team.add(piece);

@@ -5,10 +5,10 @@ import java.util.Set;
 
 import board.Space;
 import game.Team;
-import game.TeamColor;
 
 public class Bishop extends Piece {
-    public Bishop(TeamColor team) {
+
+    public Bishop(Team team) {
         super(team);
     }
 

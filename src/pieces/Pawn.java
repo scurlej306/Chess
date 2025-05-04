@@ -15,9 +15,9 @@ public class Pawn extends Piece {
 
     private final int startRow;
 
-    public Pawn(TeamColor team, int startRow) {
+    public Pawn(Team team, int startRow) {
         super(team);
-        direction = team == TeamColor.WHITE ? 1 : -1;
+        direction = team.getColor() == TeamColor.WHITE ? 1 : -1;
         this.startRow = startRow;
     }
 

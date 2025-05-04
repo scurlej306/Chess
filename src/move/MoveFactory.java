@@ -6,13 +6,13 @@ import java.util.stream.Collectors;
 
 import board.Board;
 import board.Space;
-import game.TeamColor;
+import game.Team;
 import input.InputDto;
 import pieces.King;
 import pieces.Piece;
 import pieces.Rook;
 
-public record MoveFactory(InputDto input, Board board, TeamColor currentTeam) {
+public record MoveFactory(InputDto input, Board board, Team currentTeam) {
 
     public Move constructMove() {
         if (input.castling) {
@@ -41,7 +41,7 @@ public record MoveFactory(InputDto input, Board board, TeamColor currentTeam) {
         if (kingMoves.isEmpty()) {
             throw new IllegalArgumentException("There cannot be any pieces between the king and its target space");
         }
-        if (TeamColor.getOpposite(currentTeam).stream().anyMatch(piece -> kingMoves.stream()
+        if (currentTeam.getOpponent().stream().anyMatch(piece -> kingMoves.stream()
                 .anyMatch(space -> MoveValidator.isValid(piece, space, board)))) {
             throw new IllegalArgumentException("The king cannot move out of, through, or into check");
         }
