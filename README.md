@@ -4,7 +4,8 @@ A command-line app for playing chess.
 
 ## Build
 
-Built with Java 21. Can be executed from an IDE or quickly compiled into a `.jar` file and run from the command line.
+Built with Java JDK 23. Can be executed from an IDE or quickly compiled into a `.jar` file and run from the command
+line.
 
 ## How to play
 
