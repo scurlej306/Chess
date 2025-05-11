@@ -1,6 +1,5 @@
 package move;
 
-import board.Board;
 import board.Space;
 import pieces.King;
 
@@ -14,8 +13,8 @@ class CastleMove extends Move {
     }
 
     @Override
-    public void doMove(Board board) {
-        super.doMove(board);
-        rookMove.doMove(board);
+    public void doMove() {
+        super.doMove();
+        rookMove.doMove();
     }
 }

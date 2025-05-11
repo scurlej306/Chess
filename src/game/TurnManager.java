@@ -80,7 +80,7 @@ class TurnManager {
             System.out.printf("Move '%s' had the following error: %s. Try again.\n", input, e.getMessage());
             return processTurn();
         }
-        move.doMove(board);
+        move.doMove();
         return determineState();
     }
 }

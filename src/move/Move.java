@@ -1,21 +1,21 @@
 package move;
 
-import board.Board;
 import board.Space;
 import pieces.Castles;
 import pieces.Piece;
 
 public class Move {
 
-    private final Piece targetPiece;
-    private final Space targetSpace;
+    protected final Piece targetPiece;
+
+    protected final Space targetSpace;
 
     Move(Piece targetPiece, Space targetSpace) {
         this.targetPiece = targetPiece;
         this.targetSpace = targetSpace;
     }
 
-    public void doMove(Board board) {
+    public void doMove() {
         Piece prevOccupant = targetSpace.getOccupant();
         if (prevOccupant != null) {
             prevOccupant.getTeam().remove(prevOccupant);

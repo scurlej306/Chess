@@ -9,6 +9,7 @@ import board.Space;
 import game.Team;
 import input.InputDto;
 import pieces.King;
+import pieces.Pawn;
 import pieces.Piece;
 import pieces.Rook;
 
@@ -50,9 +51,11 @@ public record MoveFactory(InputDto input, Board board, Team currentTeam) {
             throw new IllegalArgumentException("The king cannot move out of, through, or into check");
         }
 
+        int kingRow = king.getCurSpace().getRow();
         Rook rook =
                 (Rook) currentTeam.stream().filter(Rook.class::isInstance).filter(
-                                piece -> piece.getCurSpace().getCol() == input.castlingRookCol).findFirst()
+                                piece -> piece.getCurSpace().getCol() == input.castlingRookCol &&
+                                         piece.getCurSpace().getRow() == kingRow).findFirst()
                         .orElseThrow(IllegalStateException::new);
         if (rook.hasAlreadyMoved()) {
             throw new IllegalArgumentException("The desired rook has already moved. Castling with this rook is not allowed");
@@ -80,7 +83,24 @@ public record MoveFactory(InputDto input, Board board, Team currentTeam) {
         }
 
         Piece targetPiece = validPieces.iterator().next();
-        return new Move(targetPiece, targetSpace);
+        Move normalMove = new Move(targetPiece, targetSpace);
+        if (input.pawnPromotionToken == null) {
+            if (targetPiece instanceof Pawn && destinationIsBackRank()) {
+                throw new IllegalArgumentException("A promotion target must be provided. Add '=X' to the end of the move command, where 'X' is the type of piece that the pawn becomes");
+            }
+            return normalMove;
+        }
+        if (!(targetPiece instanceof Pawn)) {
+            throw new IllegalArgumentException("Only pawns may be promoted to a new piece type");
+        }
+        if (!destinationIsBackRank()) {
+            throw new IllegalArgumentException("Pawns may only be promoted on the opponent's back rank");
+        }
+        return new PromotionMove(normalMove, input.pawnPromotionToken);
+    }
+
+    private boolean destinationIsBackRank() {
+        return input.destinationRow == 8 || input.destinationRow == 1;
     }
 
     private Predicate<Piece> matchesDisambiguator() {
