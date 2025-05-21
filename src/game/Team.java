@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import board.Space;
 import pieces.Bishop;
 import pieces.Knight;
 import pieces.Piece;
@@ -11,6 +12,8 @@ import pieces.Piece;
 public class Team {
 
     private final TeamColor color;
+
+    private Space enPassantOpportunity;
 
     private Team opponent;
 
@@ -25,8 +28,8 @@ public class Team {
         Team black = new Team(TeamColor.BLACK);
         Team white = new Team(TeamColor.WHITE);
 
-        black.setOpponent(white);
-        white.setOpponent(black);
+        black.opponent = white;
+        white.opponent = black;
 
         return new Players(black, white);
     }
@@ -37,6 +40,10 @@ public class Team {
 
     public TeamColor getColor() {
         return color;
+    }
+
+    public Space getEnPassantOpportunity() {
+        return enPassantOpportunity;
     }
 
     public Team getOpponent() {
@@ -52,12 +59,12 @@ public class Team {
         pieces.remove(piece);
     }
 
-    public Stream<Piece> stream() {
-        return pieces.stream();
+    public void setEnPassantOpportunity(Space targetSpace) {
+        enPassantOpportunity = targetSpace;
     }
 
-    private void setOpponent(Team opponent) {
-        this.opponent = opponent;
+    public Stream<Piece> stream() {
+        return pieces.stream();
     }
 
     public static class Players {
@@ -91,6 +98,7 @@ public class Team {
         }
 
         public void toggleCurrentTeam() {
+            currentTeam.setEnPassantOpportunity(null);
             currentTeam = currentTeam.getOpponent();
         }
 

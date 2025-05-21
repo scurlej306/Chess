@@ -31,6 +31,10 @@ public class Pawn extends Piece {
         return checkSpace != null && checkSpace.getOccupant() == null;
     }
 
+    public int getDirection() {
+        return direction;
+    }
+
     @Override
     public Set<Space> getMovementDomain() {
         Set<Space> domain = new HashSet<>();
@@ -41,7 +45,7 @@ public class Pawn extends Piece {
 
         checkSpace = curSpace.calculateMove(0, direction);
         addSpace(checkSpace, Pawn::isValidNormalSpace, domain::add);
-        if (curSpace.getRow() == startRow) {
+        if (curSpace.getRow() == startRow && domain.contains(checkSpace)) { // ensure the first space was a legal move, otherwise a double move is illegal
             checkSpace = curSpace.calculateMove(0, direction * 2);
             addSpace(checkSpace, Pawn::isValidNormalSpace, domain::add);
         }
@@ -54,6 +58,8 @@ public class Pawn extends Piece {
     }
 
     private boolean isValidAttackSpace(Space checkSpace) {
-        return checkSpace != null && checkSpace.getOccupant() != null && checkSpace.getOccupant().getTeam() != getTeam();
+        return checkSpace != null &&
+               ((checkSpace.getOccupant() != null && checkSpace.getOccupant().getTeam() != getTeam()) ||
+                checkSpace.equals(getTeam().getEnPassantOpportunity()));
     }
 }
